@@ -1,8 +1,8 @@
 # AI Alignment and the Halting Problem
 
-A technical analysis and critique of the paper *Machines that halt resolve the undecidability of artificial intelligence alignment* by Melo et al. (2025).
+A technical blog post and critique exploring the relationship between computability theory and AI alignment, based on the paper Machines that halt resolve the undecidability of artificial intelligence alignment by Melo et al. (2025).
 
-This project, written in blog format, explores the relationship between computability theory and AI alignment, focusing on why a universal verifier for AI alignment cannot exist and what architectural alternatives might still allow for provably aligned systems.
+This project explores the relationship between computability theory and AI alignment, focusing on why a universal verifier for AI alignment cannot exist and what architectural alternatives might still allow for provably aligned systems.
 
 ## Overview
 
