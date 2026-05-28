@@ -4,6 +4,9 @@ A technical blog post and critique exploring the relationship between computabil
 
 This project explores the relationship between computability theory and AI alignment, focusing on why a universal verifier for AI alignment cannot exist and what architectural alternatives might still allow for provably aligned systems.
 
+🌐 Live Site:
+https://mariasousa382.github.io/computability-ai-alignment/
+
 ## Overview
 
 The paper argues that determining whether an arbitrary AI system will always behave according to a desired alignment function is undecidable.
