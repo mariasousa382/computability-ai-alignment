@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will This AI Behave? Good Luck Deciding That</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0d0d0f;
+      --surface:   #131316;
+      --border:    #232328;
+      --accent:    #c8f060;
+      --accent2:   #60b8f0;
+      --muted:     #555560;
+      --text:      #e8e8ec;
+      --text-soft: #9898a8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+      font-size: 17px;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative;
+      padding: 5rem 2rem 4rem;
+      max-width: 780px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .label::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      margin-top: 1.5rem;
+    }
+
+    .meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .meta span::before {
+      content: '—';
+      color: var(--muted);
+    }
+
+    /* ── READING PROGRESS ── */
+    #progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s linear;
+      z-index: 100;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem 6rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── INTRO PULL ── */
+    .intro {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-soft);
+      border-left: 3px solid var(--accent);
+      padding-left: 1.4rem;
+      margin-bottom: 2.8rem;
+      line-height: 1.65;
+    }
+
+    /* ── SECTION HEADINGS ── */
+    h2 {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin: 3.5rem 0 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    h2 .num {
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    h2::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      margin-left: 0.5rem;
+    }
+
+    h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+
+    p { margin-bottom: 1.4rem; color: var(--text-soft); }
+
+    strong { color: var(--text); font-weight: 400; }
+
+    /* ── CALLOUT / FORMAL BLOCK ── */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      padding: 1.4rem 1.6rem;
+      margin: 2rem 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.9;
+      color: var(--text-soft);
+    }
+
+    .callout .callout-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent2);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── THEOREM-LIKE BLOCKS ── */
+    .theorem {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 0;
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+    }
+
+    .theorem-num {
+      background: var(--accent);
+      color: var(--bg);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      letter-spacing: 0.1em;
+      padding: 1rem 0;
+      text-transform: uppercase;
+    }
+
+    .theorem-body {
+      padding: 1.2rem 1.4rem;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      line-height: 1.75;
+    }
+
+    .theorem-body strong { color: var(--accent); }
+
+    /* ── VERDICT CARD ── */
+    .verdict {
+      margin: 3rem 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #131316 0%, #0d1a0d 100%);
+      border: 1px solid #2a3a1a;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .verdict::before {
+      content: 'VERDICT';
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      opacity: 0.5;
+    }
+
+    .verdict p {
+      color: var(--text);
+      font-style: italic;
+      font-size: 1.05rem;
+      margin: 0;
+    }
+
+    /* ── SOURCE LINK ── */
+    .source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 3rem;
+      padding: 0.9rem 1.4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text-soft);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .source-link:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .source-link svg { flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    footer {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* ── FADE-IN ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header, main > * {
+      animation: fadeUp 0.6s ease both;
+    }
+
+    main > *:nth-child(1)  { animation-delay: 0.05s; }
+    main > *:nth-child(2)  { animation-delay: 0.10s; }
+    main > *:nth-child(3)  { animation-delay: 0.15s; }
+    main > *:nth-child(4)  { animation-delay: 0.20s; }
+    main > *:nth-child(5)  { animation-delay: 0.25s; }
+    main > *:nth-child(6)  { animation-delay: 0.30s; }
+    main > *:nth-child(7)  { animation-delay: 0.35s; }
+    main > *:nth-child(8)  { animation-delay: 0.40s; }
+    main > *:nth-child(9)  { animation-delay: 0.45s; }
+    main > *:nth-child(10) { animation-delay: 0.50s; }
+
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      header, main { padding-left: 1.2rem; padding-right: 1.2rem; }
+      .theorem { grid-template-columns: 2.2rem 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<header>
+  <div class="label">CS142 · Theory of Computation · Minerva University</div>
+  <h1>Will This AI Behave?<br /><em>Good Luck Deciding That.</em></h1>
+  <div class="meta">
+    <span>April 5, 2026</span>
+    <span>~1,200 words</span>
+    <span>Maria Sousa</span>
+  </div>
+</header>
+
+<main>
+
+  <p class="intro">
+    Suppose you've just trained a shiny new language model. It's acing every benchmark,
+    passing red-team evaluations, and producing perfectly assembled outputs. But then comes
+    the uncomfortable question: is the system actually doing what you want, or is it just
+    very good at <em>looking</em> like it does?
+  </p>
+
+  <p>
+    A recent paper by Melo et al. (2025) argues that if you're hoping to answer that question
+    by building some kind of universal alignment checker, you're not just out of luck.
+    You're <strong>provably out of luck.</strong> But the story doesn't end there.
+  </p>
+
+  <!-- SECTION I -->
+  <h2><span class="num">I.</span> The Inner Alignment Problem</h2>
+  <h3>Why a Universal "AI Monitor" Can't Exist</h3>
+
+  <p>
+    Before getting into the impossibility result, it helps to separate two problems that are
+    often conflated. <strong>Outer alignment</strong> asks whether we've specified the right
+    goal — did we write down an objective function that actually reflects our intentions?
+    <strong>Inner alignment</strong> operates at a different level entirely: even if we have
+    a perfectly specified goal, does the AI system genuinely pursue it across <em>all possible inputs</em>?
+  </p>
+
+  <div class="callout">
+    <div class="callout-label">Formal Setup</div>
+    · An AI model <em>M</em> maps input bytes to output bytes<br />
+    · We assume outer alignment is solved — a judge function <em>J<sub>v</sub>(i, o)</em> determines whether an output is "aligned"<br />
+    · The goal: build a verifier <em>V</em> that checks whether, for <strong>all inputs</strong>, M(i) satisfies J<sub>v</sub>
+  </div>
+
+  <p>
+    Melo et al. present two complementary arguments. By the Church-Turing Thesis, every AI
+    program can be modeled as a Turing machine, making computability theory directly applicable.
+  </p>
+
+  <div class="theorem">
+    <div class="theorem-num">Arg 1</div>
+    <div class="theorem-body">
+      <strong>Halting Problem Diagonal.</strong> Assume a perfect verifier <em>V</em> exists.
+      Construct an adversarial model <em>M'</em> that inspects its own code via <em>V</em>
+      and does the <em>opposite</em> of what <em>V</em> predicts. If <em>V</em> declares
+      <em>M'</em> aligned, it produces a misaligned output — and vice versa.
+      The verifier is wrong regardless. Therefore <em>V</em> cannot exist. This is also
+      shown formally via a reduction from the Halting Problem.
+    </div>
+  </div>
+
+  <div class="theorem">
+    <div class="theorem-num">Arg 2</div>
+    <div class="theorem-body">
+      <strong>Rice's Theorem.</strong> Any non-trivial semantic property of a program is
+      undecidable. Alignment is clearly non-trivial (some programs satisfy the judge, some
+      don't) and semantic (it's about input-output behavior). QED.
+    </div>
+  </div>
+
+  <p>
+    So: no Turing machine can decide, for an arbitrary AI, whether it always satisfies J<sub>v</sub>.
+    Rather than verifying arbitrary AI after the fact — what if we build AI that is
+    <strong>aligned by construction</strong>?
+  </p>
+
+  <!-- SECTION II -->
+  <h2><span class="num">II.</span> Realistic Models</h2>
+  <h3>The Case for Halting-Constrained AI</h3>
+
+  <p>
+    Having established undecidability for Turing machines, the authors make a key observation:
+    real computers aren't actually Turing machines. A physical computer with <em>M</em> bits
+    of memory can occupy at most 2<sup>M</sup> configurations — making it technically a
+    <strong>finite automaton</strong>, and finite automata always halt.
+  </p>
+
+  <p>
+    If we constrain AI models to always terminate and produce an output, the judge function
+    J<sub>v</sub> can always be applied, and alignment becomes decidable. Feed-forward neural
+    networks perform a fixed sequence of operations, guaranteeing termination. However, with
+    an input size of L, there are 2<sup>L</sup> possible inputs to verify — decidable, yes.
+    Tractable? Not remotely.
+  </p>
+
+  <p>
+    The proposed flip: instead of training models and then verifying alignment, start with
+    base models <em>proven</em> to satisfy the judge, define operations that preserve alignment,
+    and any AI built through a finite application of those operations is guaranteed to be aligned.
+    More practically, run the judge at inference time on every output — if it approves, pass it
+    through; otherwise, return a pre-approved default. Constitutional Classifiers already
+    implement something similar, though their judge is learned rather than formally specified.
+  </p>
+
+  <p>
+    There is, however, a catch. A single LLM forward pass always halts. But modern AI systems
+    embed LLMs in <em>loops</em>. An agent's output feeds back as the next call's input, with no
+    guarantee the outer loop terminates. The very thing that makes agents powerful —
+    iterative reasoning, tool use, planning — is what breaks the halting constraint.
+  </p>
+
+  <p>
+    The proposed solution: a <strong>θ parameter</strong> that architecturally forces the model
+    toward a terminal state regardless of input. Think of it as AI mortality — a mechanism ensuring
+    the system "ages," eventually terminating. Test-Time Training (TTT) architectures, in which
+    internal loops converge to a stable fixed point after sufficient steps, are a concrete path
+    toward satisfying this constraint.
+  </p>
+
+  <!-- SECTION III -->
+  <h2><span class="num">III.</span> Practical Critique</h2>
+  <h3>Is This Framework Actually Feasible?</h3>
+
+  <p>
+    The theoretical contributions are genuinely valuable. The reframing from "verify arbitrary AI"
+    to "build aligned AI from certified components" is a useful conceptual shift — and one that
+    safety-critical fields like nuclear and avionic engineering already operate on. The principle
+    is sound.
+  </p>
+
+  <p>
+    But there are practical problems that deserve more attention. Even for halting-constrained
+    models, exhaustive verification remains intractable. The paper's own engineering targets of
+    2<sup>80</sup> operations fall far below the complexity of any useful modern AI system.
+    Output filtering sidesteps this in some cases, but it isn't eliminating misaligned behavior —
+    it's preventing it from being <em>expressed</em>, while shifting the entire burden onto the
+    reliability and completeness of the judge function.
+  </p>
+
+  <p>
+    The whole framework assumes J<sub>v</sub> is correctly specified and computable. Yet human
+    values may be uncomputable and internally contradictory — the autonomous vehicle dilemma
+    being the canonical example. For narrow, well-defined tasks, specifying J<sub>v</sub> is
+    plausible. For general-purpose AI, it might not be.
+  </p>
+
+  <p>
+    Moreover, the architectures the authors propose constraining are precisely the ones that
+    make modern AI most capable. Reasoning models deliberately extend computation because
+    doing so improves performance. The θ parameter that guarantees termination also puts a
+    ceiling on how long the model can think, how much it can explore, and how adaptively it
+    can respond to novel situations. Whether bounded convergence in TTT architectures can
+    be achieved without significant capability loss remains an open empirical question.
+  </p>
+
+  <div class="verdict">
+    <p>
+      Melo et al. deliver a well-argued research direction. For those concerned with
+      the long-term behavior of AI systems, the paradigm shift — and identifying halting
+      as a necessary precondition — are meaningful contributions. Yet the hard engineering
+      and philosophical work still lies ahead.
+    </p>
+  </div>
+
+  <!-- SOURCE LINK -->
+  <a class="source-link" href="https://www.nature.com/articles/s41598-025-99060-2" target="_blank" rel="noopener noreferrer">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+      <polyline points="15 3 21 3 21 9"/>
+      <line x1="10" y1="14" x2="21" y2="3"/>
+    </svg>
+    Read the original paper — Melo et al., Scientific Reports (2025)
+  </a>
+
+</main>
+
+<footer>
+  <span>CS142 · Minerva University · Maria Sousa</span>
+  <span>April 2026</span>
+</footer>
+
+<script>
+  const bar = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (scrolled / total * 100) + '%';
+  });
+</script>
+
+</body>
+</html>
